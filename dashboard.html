@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Pedagógico</title>
+  <style>
+/* ─── Reset & base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --color-bg:          #f0f2f5;
+  --color-surface:     #ffffff;
+  --color-border:      #e2e8f0;
+  --color-text:        #1e293b;
+  --color-text-muted:  #64748b;
+
+  --color-brand-bg:    #1e3a5f;
+  --color-brand-text:  #ffffff;
+  --color-brand-active:#f59e0b;
+
+  --color-critico:     #ef4444;
+  --color-critico-bg:  #fef2f2;
+  --color-medio:       #f59e0b;
+  --color-medio-bg:    #fffbeb;
+  --color-excelencia:  #22c55e;
+  --color-excelencia-bg:#f0fdf4;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.1);
+}
+
+html { font-size: 14px; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+}
+
+/* ─── Brand Bar ─────────────────────────────────────────────────────────────── */
+.brand-bar {
+  background: var(--color-brand-bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+
+.brand-bar__inner {
+  display: flex;
+  gap: 4px;
+  padding: 10px 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.brand-bar__inner::-webkit-scrollbar { display: none; }
+
+.brand-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 2px solid transparent;
+  color: rgba(255,255,255,.7);
+  padding: 6px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 500;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.brand-btn:hover {
+  color: #fff;
+  border-color: rgba(255,255,255,.3);
+}
+.brand-btn.active {
+  color: var(--color-brand-bg);
+  background: var(--color-brand-active);
+  border-color: var(--color-brand-active);
+  font-weight: 700;
+}
+
+/* ─── Filters Bar ───────────────────────────────────────────────────────────── */
+.filters-bar {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 14px 24px;
+}
+
+.filters-bar__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.filter-group > label {
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+/* ─── Dropdown ──────────────────────────────────────────────────────────────── */
+.dropdown { position: relative; }
+
+.dropdown__toggle {
+  width: 100%;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: .85rem;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: border-color .15s, box-shadow .15s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.dropdown__toggle::after {
+  content: '▾';
+  font-size: .7rem;
+  flex-shrink: 0;
+  transition: transform .2s;
+}
+.dropdown.open .dropdown__toggle::after { transform: rotate(180deg); }
+
+.dropdown__toggle:hover,
+.dropdown.open .dropdown__toggle {
+  border-color: var(--color-brand-bg);
+  box-shadow: 0 0 0 3px rgba(30,58,95,.12);
+  outline: none;
+}
+
+.dropdown__menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+  padding: 6px 0;
+}
+.dropdown.open .dropdown__menu { display: block; }
+
+.dropdown__menu--scroll { max-height: 240px; overflow-y: auto; }
+
+.dropdown__menu label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: background .12s;
+}
+.dropdown__menu label:hover { background: var(--color-bg); }
+.dropdown__menu input { accent-color: var(--color-brand-bg); }
+
+/* ─── Section layout ────────────────────────────────────────────────────────── */
+.kpi-section,
+.critical-block,
+.table-section,
+.students-section {
+  padding: 20px 24px;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 14px;
+}
+
+/* ─── KPI Cards ─────────────────────────────────────────────────────────────── */
+.kpi-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  padding-bottom: 0;
+}
+
+.kpi-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+.kpi-card__label {
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--color-text-muted);
+}
+
+.kpi-card__value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.kpi-card__sub {
+  font-size: .78rem;
+  font-weight: 500;
+}
+
+/* ─── Level colours ─────────────────────────────────────────────────────────── */
+.level-critico     { color: var(--color-critico); }
+.level-medio       { color: var(--color-medio); }
+.level-excelencia  { color: var(--color-excelencia); }
+
+.positive { color: var(--color-excelencia); }
+.negative { color: var(--color-critico); }
+
+/* ─── Badge ─────────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: .82rem;
+  font-weight: 700;
+}
+.badge--sm { font-size: .75rem; padding: 2px 8px; }
+
+.badge--critico    { background: var(--color-critico-bg);    color: var(--color-critico); }
+.badge--medio      { background: var(--color-medio-bg);      color: #b45309; }
+.badge--excelencia { background: var(--color-excelencia-bg); color: #15803d; }
+
+/* ─── Critical Block ────────────────────────────────────────────────────────── */
+.critical-block {
+  background: var(--color-critico-bg);
+  border: 1.5px solid var(--color-critico);
+  border-radius: var(--radius-lg);
+  margin: 20px 24px 0;
+  padding: 18px 22px;
+}
+
+.critical-block__title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--color-critico);
+  margin-bottom: 12px;
+}
+
+.critical-block__list { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.critical-student {
+  background: #fff;
+  border: 1px solid var(--color-critico);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 200px;
+}
+
+.critical-student__name { font-weight: 700; font-size: .88rem; }
+.critical-student__avg  { font-size: .8rem;  color: var(--color-critico); font-weight: 600; }
+.critical-student__discs { font-size: .75rem; color: var(--color-text-muted); }
+
+.no-critical { font-size: .85rem; color: var(--color-text-muted); }
+
+/* ─── Tables ────────────────────────────────────────────────────────────────── */
+.table-wrapper { overflow-x: auto; border-radius: var(--radius-md); }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.data-table thead th {
+  background: var(--color-brand-bg);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 11px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-table tbody tr { border-bottom: 1px solid var(--color-border); }
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:nth-child(even) { background: #f8fafc; }
+.data-table tbody tr:hover { background: #f1f5f9; }
+
+.data-table tbody td {
+  padding: 9px 14px;
+  font-size: .85rem;
+  white-space: nowrap;
+}
+
+/* ─── Student Cards ─────────────────────────────────────────────────────────── */
+.students-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.student-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.student-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 18px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.student-card__name {
+  font-weight: 700;
+  font-size: .95rem;
+}
+
+.student-card__meta {
+  display: flex;
+  gap: 18px;
+  font-size: .82rem;
+  color: var(--color-text-muted);
+}
+
+.data-table--student thead th { background: #334155; }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .filters-bar__inner { gap: 8px; }
+  .filter-group { min-width: 140px; }
+  .kpi-section { grid-template-columns: 1fr 1fr; }
+  .student-card__header { flex-direction: column; align-items: flex-start; }
+}
+  </style>
+</head>
+<body>
+
+  <!-- Brand Bar -->
+  <header class="brand-bar">
+    <div class="brand-bar__inner">
+      <button class="brand-btn active" data-brand="Matriz Educação">Matriz Educação</button>
+      <button class="brand-btn" data-brand="QI">QI</button>
+      <button class="brand-btn" data-brand="Apogeu">Apogeu</button>
+      <button class="brand-btn" data-brand="Americano">Americano</button>
+      <button class="brand-btn" data-brand="União">União</button>
+      <button class="brand-btn" data-brand="Unificado">Unificado</button>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <section class="filters-bar">
+    <div class="filters-bar__inner">
+
+      <div class="filter-group">
+        <label>Unidade</label>
+        <div class="dropdown" id="dd-unidade">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu">
+            <label><input type="radio" name="unidade" value="Unidade Norte" checked /> Unidade Norte</label>
+            <label><input type="radio" name="unidade" value="Unidade Sul" /> Unidade Sul</label>
+            <label><input type="radio" name="unidade" value="Unidade Centro" /> Unidade Centro</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Segmento</label>
+        <div class="dropdown" id="dd-segmento">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu">
+            <label><input type="radio" name="segmento" value="Ensino Fundamental I" checked /> Ensino Fundamental I</label>
+            <label><input type="radio" name="segmento" value="Ensino Fundamental II" /> Ensino Fundamental II</label>
+            <label><input type="radio" name="segmento" value="Ensino Médio" /> Ensino Médio</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Turma</label>
+        <div class="dropdown" id="dd-turma">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu">
+            <label><input type="radio" name="turma" value="5º A" checked /> 5º A</label>
+            <label><input type="radio" name="turma" value="5º B" /> 5º B</label>
+            <label><input type="radio" name="turma" value="6º A" /> 6º A</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Bimestre</label>
+        <div class="dropdown" id="dd-bimestre">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu dropdown__menu--multi">
+            <label><input type="checkbox" value="1º Bimestre" checked /> 1º Bimestre</label>
+            <label><input type="checkbox" value="2º Bimestre" /> 2º Bimestre</label>
+            <label><input type="checkbox" value="3º Bimestre" /> 3º Bimestre</label>
+            <label><input type="checkbox" value="4º Bimestre" /> 4º Bimestre</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Avaliação + Média</label>
+        <div class="dropdown" id="dd-avaliacao">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu">
+            <label><input type="radio" name="avaliacao" value="Avaliação 1" checked /> Avaliação 1</label>
+            <label><input type="radio" name="avaliacao" value="Avaliação 2" /> Avaliação 2</label>
+            <label><input type="radio" name="avaliacao" value="Média Bimestral" /> Média Bimestral</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Aluno</label>
+        <div class="dropdown" id="dd-aluno">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu dropdown__menu--multi dropdown__menu--scroll">
+            <!-- populated by JS -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- KPIs -->
+  <section class="kpi-section" id="kpi-section">
+    <div class="kpi-card">
+      <span class="kpi-card__label">Média da Turma</span>
+      <span class="kpi-card__value" id="kpi-media-turma">—</span>
+      <span class="kpi-card__sub" id="kpi-media-turma-sub"></span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-card__label">Média da Marca</span>
+      <span class="kpi-card__value" id="kpi-media-marca">—</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-card__label">Média Grupo Raiz</span>
+      <span class="kpi-card__value" id="kpi-media-raiz">—</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-card__label">Frequência da Turma</span>
+      <span class="kpi-card__value" id="kpi-frequencia">—</span>
+    </div>
+  </section>
+
+  <!-- Critical Block (only for Média Bimestral) -->
+  <section class="critical-block" id="critical-block" style="display:none;">
+    <h3 class="critical-block__title">Alunos em Nível Crítico</h3>
+    <div class="critical-block__list" id="critical-list"></div>
+  </section>
+
+  <!-- Discipline Table -->
+  <section class="table-section">
+    <h2 class="section-title">Desempenho por Disciplina</h2>
+    <div class="table-wrapper">
+      <table class="data-table" id="discipline-table">
+        <thead>
+          <tr>
+            <th>Disciplina</th>
+            <th>Média Turma</th>
+            <th>Média Marca</th>
+            <th>Média Raiz</th>
+          </tr>
+        </thead>
+        <tbody id="discipline-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Student Cards -->
+  <section class="students-section" id="students-section">
+    <h2 class="section-title">Visão Individual do Aluno</h2>
+    <div class="students-grid" id="students-grid"></div>
+  </section>
+
+  <script>
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const DISCIPLINES = [
+  'Matemática','Português','Ciências','História',
+  'Geografia','Artes','Educação Física','Inglês',
+];
+
+const STUDENTS = [
+  'Ana Clara Silva','Bruno Henrique Souza','Camila Ferreira Costa',
+  'Daniel Martins Rocha','Eduarda Lima Pereira','Felipe Santos Gomes',
+  'Gabriela Alves Mendes','Henrique Nunes Barros','Isabela Moura Carvalho',
+  'João Pedro Ribeiro','Larissa Teixeira Dias','Marcos Vinícius Correia',
+];
+
+const BRAND_AVERAGES = {
+  'Matemática':7.4,'Português':7.6,'Ciências':7.2,'História':7.8,
+  'Geografia':7.5,'Artes':8.1,'Educação Física':8.4,'Inglês':6.9,
+};
+
+const RAIZ_AVERAGES = {
+  'Matemática':7.1,'Português':7.3,'Ciências':7.0,'História':7.5,
+  'Geografia':7.2,'Artes':7.9,'Educação Física':8.2,'Inglês':6.7,
+};
+
+const STUDENT_FREQUENCY = {
+  'Ana Clara Silva':95,'Bruno Henrique Souza':88,'Camila Ferreira Costa':92,
+  'Daniel Martins Rocha':79,'Eduarda Lima Pereira':97,'Felipe Santos Gomes':85,
+  'Gabriela Alves Mendes':91,'Henrique Nunes Barros':74,'Isabela Moura Carvalho':98,
+  'João Pedro Ribeiro':83,'Larissa Teixeira Dias':90,'Marcos Vinícius Correia':87,
+};
+
+function seededRandom(seed) {
+  let s = seed;
+  return function () { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+}
+function hashStr(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+function getStudentScore(student, discipline, evaluation) {
+  const rng = seededRandom(hashStr(student + discipline + evaluation));
+  return Math.round((4.5 + rng() * 5.5) * 10) / 10;
+}
+function buildData(evaluation) {
+  const studentScores = {};
+  const sums = {}, counts = {};
+  DISCIPLINES.forEach(d => { sums[d] = 0; counts[d] = 0; });
+  STUDENTS.forEach(student => {
+    studentScores[student] = {};
+    DISCIPLINES.forEach(disc => {
+      const score = getStudentScore(student, disc, evaluation);
+      studentScores[student][disc] = score;
+      sums[disc] += score; counts[disc]++;
+    });
+  });
+  const classByDiscipline = {};
+  DISCIPLINES.forEach(d => { classByDiscipline[d] = Math.round((sums[d] / counts[d]) * 10) / 10; });
+  const freqValues = Object.values(STUDENT_FREQUENCY);
+  const classFrequency = Math.round(freqValues.reduce((a, b) => a + b, 0) / freqValues.length);
+  return { classByDiscipline, studentScores, classFrequency };
+}
+
+// ─── State ────────────────────────────────────────────────────────────────────
+const state = {
+  brand:'Matriz Educação', unidade:'Unidade Norte',
+  segmento:'Ensino Fundamental I', turma:'5º A',
+  bimestres:['1º Bimestre'], avaliacao:'Avaliação 1', alunos:[],
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function level(s) { return s < 6 ? 'critico' : s < 8 ? 'medio' : 'excelencia'; }
+function levelLabel(s) { return s < 6 ? 'Crítico' : s < 8 ? 'Médio' : 'Excelência'; }
+function fmt(n) { return Number(n).toFixed(1).replace('.', ','); }
+function avgOf(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+
+// ─── Dropdowns ────────────────────────────────────────────────────────────────
+function initDropdowns() {
+  document.querySelectorAll('.dropdown').forEach(dd => {
+    dd.querySelector('.dropdown__toggle').addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('.dropdown.open').forEach(o => { if (o!==dd) o.classList.remove('open'); });
+      dd.classList.toggle('open');
+    });
+  });
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown.open').forEach(o => o.classList.remove('open'));
+  });
+  document.querySelectorAll('.dropdown__menu').forEach(m => m.addEventListener('click', e => e.stopPropagation()));
+
+  ['unidade','segmento','turma','avaliacao'].forEach(name => {
+    document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+      radio.addEventListener('change', () => {
+        state[name] = radio.value;
+        syncToggleLabel(radio.closest('.dropdown'));
+        render();
+      });
+    });
+  });
+
+  const ddBimestre = document.getElementById('dd-bimestre');
+  ddBimestre.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      state.bimestres = [...ddBimestre.querySelectorAll('input:checked')].map(c => c.value);
+      if (!state.bimestres.length) { cb.checked = true; state.bimestres = [cb.value]; }
+      syncToggleLabel(ddBimestre);
+      render();
+    });
+  });
+
+  const alunoMenu = document.querySelector('#dd-aluno .dropdown__menu');
+  alunoMenu.innerHTML = STUDENTS.map(s =>
+    `<label><input type="checkbox" value="${s}" /> ${s}</label>`
+  ).join('');
+  alunoMenu.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      state.alunos = [...alunoMenu.querySelectorAll('input:checked')].map(c => c.value);
+      syncToggleLabel(document.getElementById('dd-aluno'));
+      render();
+    });
+  });
+
+  document.querySelectorAll('.dropdown').forEach(syncToggleLabel);
+}
+
+function syncToggleLabel(dd) {
+  const toggle = dd.querySelector('.dropdown__toggle');
+  const checked = [...dd.querySelectorAll('input:checked')];
+  toggle.textContent = !checked.length ? 'Selecionar'
+    : checked.length === 1 ? checked[0].value
+    : `${checked.length} selecionados`;
+}
+
+// ─── Brand bar ────────────────────────────────────────────────────────────────
+function initBrandBar() {
+  document.querySelectorAll('.brand-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.brand = btn.dataset.brand;
+      render();
+    });
+  });
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  const { avaliacao, alunos } = state;
+  const isBimestral = avaliacao === 'Média Bimestral';
+  const { classByDiscipline, studentScores, classFrequency } = buildData(avaliacao);
+  const activeStudents = alunos.length ? alunos : STUDENTS;
+
+  // KPIs
+  const classAvgAll = avgOf(DISCIPLINES.map(d => classByDiscipline[d]));
+  const brandAvgAll = avgOf(Object.values(BRAND_AVERAGES));
+  const raizAvgAll  = avgOf(Object.values(RAIZ_AVERAGES));
+
+  const elTurma = document.getElementById('kpi-media-turma');
+  elTurma.textContent = fmt(classAvgAll);
+  elTurma.className = 'kpi-card__value level-' + level(classAvgAll);
+
+  const diff = classAvgAll - brandAvgAll;
+  const elSub = document.getElementById('kpi-media-turma-sub');
+  elSub.textContent = (diff >= 0 ? '+' : '') + fmt(diff) + ' vs Marca';
+  elSub.className = 'kpi-card__sub ' + (diff >= 0 ? 'positive' : 'negative');
+
+  document.getElementById('kpi-media-marca').textContent = fmt(brandAvgAll);
+  document.getElementById('kpi-media-raiz').textContent  = fmt(raizAvgAll);
+  document.getElementById('kpi-frequencia').textContent  = classFrequency + '%';
+
+  // Critical block
+  const criticalBlock = document.getElementById('critical-block');
+  if (isBimestral) {
+    criticalBlock.style.display = '';
+    const critStudents = activeStudents.filter(s => avgOf(DISCIPLINES.map(d => studentScores[s][d])) < 6);
+    document.getElementById('critical-list').innerHTML = critStudents.length
+      ? critStudents.map(s => {
+          const avg = avgOf(DISCIPLINES.map(d => studentScores[s][d]));
+          const critDiscs = DISCIPLINES.filter(d => studentScores[s][d] < 6);
+          return `<div class="critical-student">
+            <span class="critical-student__name">${s}</span>
+            <span class="critical-student__avg">Média: ${fmt(avg)}</span>
+            <span class="critical-student__discs">${critDiscs.join(', ')}</span>
+          </div>`;
+        }).join('')
+      : '<p class="no-critical">Nenhum aluno em nível crítico.</p>';
+  } else {
+    criticalBlock.style.display = 'none';
+  }
+
+  // Discipline table
+  document.getElementById('discipline-tbody').innerHTML = DISCIPLINES.map(disc => {
+    const mt = classByDiscipline[disc];
+    return `<tr>
+      <td>${disc}</td>
+      <td><span class="badge badge--${level(mt)}">${fmt(mt)}</span></td>
+      <td>${fmt(BRAND_AVERAGES[disc])}</td>
+      <td>${fmt(RAIZ_AVERAGES[disc])}</td>
+    </tr>`;
+  }).join('');
+
+  // Student cards
+  document.getElementById('students-grid').innerHTML = activeStudents.map(student => {
+    const scores = studentScores[student];
+    const avg = avgOf(DISCIPLINES.map(d => scores[d]));
+    const rows = DISCIPLINES.map(disc => {
+      const note = scores[disc];
+      const lv = level(note);
+      return `<tr>
+        <td>${disc}</td>
+        <td class="level-${lv}">${fmt(note)}</td>
+        <td><span class="badge badge--${lv} badge--sm">${levelLabel(note)}</span></td>
+        <td>${fmt(classByDiscipline[disc])}</td>
+        <td>${fmt(BRAND_AVERAGES[disc])}</td>
+        <td>${fmt(RAIZ_AVERAGES[disc])}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="student-card">
+      <div class="student-card__header">
+        <span class="student-card__name">${student}</span>
+        <div class="student-card__meta">
+          <span>Média: <strong class="level-${level(avg)}">${fmt(avg)}</strong></span>
+          <span>Frequência: <strong>${STUDENT_FREQUENCY[student]}%</strong></span>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table data-table--student">
+          <thead><tr>
+            <th>Disciplina</th><th>Nota</th><th>Nível</th>
+            <th>Média Turma</th><th>Média Marca</th><th>Média Raiz</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initBrandBar();
+  initDropdowns();
+  render();
+});
+  </script>
+</body>
+</html>
