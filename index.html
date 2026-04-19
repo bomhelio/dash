@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Pedagógico</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Brand Bar -->
+  <header class="brand-bar">
+    <div class="brand-bar__inner">
+      <button class="brand-btn active" data-brand="Matriz Educação">Matriz Educação</button>
+      <button class="brand-btn" data-brand="QI">QI</button>
+      <button class="brand-btn" data-brand="Apogeu">Apogeu</button>
+      <button class="brand-btn" data-brand="Americano">Americano</button>
+      <button class="brand-btn" data-brand="União">União</button>
+      <button class="brand-btn" data-brand="Unificado">Unificado</button>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <section class="filters-bar">
+    <div class="filters-bar__inner">
+
+      <div class="filter-group">
+        <label>Unidade</label>
+        <div class="dropdown" id="dd-unidade">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu">
+            <label><input type="radio" name="unidade" value="Unidade Norte" checked /> Unidade Norte</label>
+            <label><input type="radio" name="unidade" value="Unidade Sul" /> Unidade Sul</label>
+            <label><input type="radio" name="unidade" value="Unidade Centro" /> Unidade Centro</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Segmento</label>
+        <div class="dropdown" id="dd-segmento">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu">
+            <label><input type="radio" name="segmento" value="Ensino Fundamental I" checked /> Ensino Fundamental I</label>
+            <label><input type="radio" name="segmento" value="Ensino Fundamental II" /> Ensino Fundamental II</label>
+            <label><input type="radio" name="segmento" value="Ensino Médio" /> Ensino Médio</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Turma</label>
+        <div class="dropdown" id="dd-turma">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu">
+            <label><input type="radio" name="turma" value="5º A" checked /> 5º A</label>
+            <label><input type="radio" name="turma" value="5º B" /> 5º B</label>
+            <label><input type="radio" name="turma" value="6º A" /> 6º A</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Bimestre</label>
+        <div class="dropdown" id="dd-bimestre">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu dropdown__menu--multi">
+            <label><input type="checkbox" value="1º Bimestre" checked /> 1º Bimestre</label>
+            <label><input type="checkbox" value="2º Bimestre" /> 2º Bimestre</label>
+            <label><input type="checkbox" value="3º Bimestre" /> 3º Bimestre</label>
+            <label><input type="checkbox" value="4º Bimestre" /> 4º Bimestre</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Avaliação + Média</label>
+        <div class="dropdown" id="dd-avaliacao">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu">
+            <label><input type="radio" name="avaliacao" value="Avaliação 1" checked /> Avaliação 1</label>
+            <label><input type="radio" name="avaliacao" value="Avaliação 2" /> Avaliação 2</label>
+            <label><input type="radio" name="avaliacao" value="Média Bimestral" /> Média Bimestral</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Aluno</label>
+        <div class="dropdown" id="dd-aluno">
+          <button class="dropdown__toggle" type="button">Selecionar</button>
+          <div class="dropdown__menu dropdown__menu--multi dropdown__menu--scroll">
+            <!-- populated by JS -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- KPIs -->
+  <section class="kpi-section" id="kpi-section">
+    <div class="kpi-card">
+      <span class="kpi-card__label">Média da Turma</span>
+      <span class="kpi-card__value" id="kpi-media-turma">—</span>
+      <span class="kpi-card__sub" id="kpi-media-turma-sub"></span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-card__label">Média da Marca</span>
+      <span class="kpi-card__value" id="kpi-media-marca">—</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-card__label">Média Grupo Raiz</span>
+      <span class="kpi-card__value" id="kpi-media-raiz">—</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-card__label">Frequência da Turma</span>
+      <span class="kpi-card__value" id="kpi-frequencia">—</span>
+    </div>
+  </section>
+
+  <!-- Critical Block (only for Média Bimestral) -->
+  <section class="critical-block" id="critical-block" style="display:none;">
+    <h3 class="critical-block__title">Alunos em Nível Crítico</h3>
+    <div class="critical-block__list" id="critical-list"></div>
+  </section>
+
+  <!-- Discipline Table -->
+  <section class="table-section">
+    <h2 class="section-title">Desempenho por Disciplina</h2>
+    <div class="table-wrapper">
+      <table class="data-table" id="discipline-table">
+        <thead>
+          <tr>
+            <th>Disciplina</th>
+            <th>Média Turma</th>
+            <th>Média Marca</th>
+            <th>Média Raiz</th>
+          </tr>
+        </thead>
+        <tbody id="discipline-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Student Cards -->
+  <section class="students-section" id="students-section">
+    <h2 class="section-title">Visão Individual do Aluno</h2>
+    <div class="students-grid" id="students-grid"></div>
+  </section>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
